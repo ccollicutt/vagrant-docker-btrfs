@@ -1,0 +1,87 @@
+---
+
+- hosts: all
+  user: vagrant
+  sudo: True
+  vars:
+    package_cache_server: 10.10.10.10
+  tasks:
+  - name: install proxy file for apt
+    template: src=templates/01proxy.j2 dest=/etc/apt/apt.conf.d/01proxy
+
+  #
+  # btrfs
+  #
+
+  - name: check if /var/lib/docker is mounted btrfs already
+    shell: mount |grep "/var/lib/docker type btrfs"
+    ignore_errors: True
+    register: docker_btrfs
+    changed_when: docker_btrfs.rc > 0
+
+  - name: ensure there is a /var/lib/docker
+    file: path=/var/lib/docker state=directory
+
+  - name: install btrfs
+    apt: pkg=btrfs-tools state=installed
+    when: docker_btrfs.changed
+
+  - name: configure vdb with btrfs
+    shell: mkfs.btrfs /dev/sdb
+    when: docker_btrfs.changed
+
+  - name: mount /dev/sdb as /var/lib/docker
+    shell: mount /dev/sdb /var/lib/docker
+    when: docker_btrfs.changed
+
+  #
+  # Docker
+  #
+
+  - name: install docker
+    apt: pkg=docker.io state=installed
+
+    # configure docker to user btrfs
+  - name: configure docker use btrfs
+    lineinfile: dest=/etc/default/docker.io regexp="#DOCKER_OPTS" line="DOCKER_OPTS=\"-s btrfs\"" backrefs=yes
+    register: docker_host
+  
+  - name: 
+
+  - name: check if the busybox image has already been pulled
+    shell: docker.io images | grep busybox
+    register: busybox_image
+    changed_when: busybox_image.rc > 0
+    ignore_errors: True
+
+  - name: pull the busybox image for docker
+    shell: docker.io pull busybox
+    when: busybox_image.changed
+
+  - name: create a dockerfiles directory
+    file: path=/home/vagrant/dockerfiles/bbrun state=directory
+
+  - name: copy over the bbrun files
+    copy: src=files/{{ item }} dest=/home/vagrant/dockerfiles/bbrun/{{ item }}
+    with_items:
+      - Dockerfile
+      - run.sh
+
+  - name: build the bbrun dockerfile
+    shell: docker.io build -t curtis/bbrun /home/vagrant/dockerfiles/bbrun/Dockerfile
+    ignore_errors: True
+
+  - name: check if alias has been added to vagrant users .bashrc file
+    shell: grep docker.io /home/vagrant/.bashrc
+    register: alias_set
+    changed_when: alias_set.rc > 0
+    ignore_errors: True  
+
+  - name: add alias for vagrant user docker = docker.io
+    shell: echo "alias docker='sudo docker.io'" >> /home/vagrant/.bashrc
+    when: alias_set.changed
+
+  handlers:
+
+  - name: restart docker
+    service: name=docker.io state=restarted
