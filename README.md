@@ -6,4 +6,4 @@ Note that it will create a .vdi file for /dev/sdb.
 
 ```bash
 $ vagrant up
-
+```

@@ -29,10 +29,14 @@
   - name: configure vdb with btrfs
     shell: mkfs.btrfs /dev/sdb
     when: docker_btrfs.changed
+    ignore_errors: True
 
-  - name: mount /dev/sdb as /var/lib/docker
-    shell: mount /dev/sdb /var/lib/docker
-    when: docker_btrfs.changed
+  #- name: mount /dev/sdb as /var/lib/docker
+  #  shell: mount /dev/sdb /var/lib/docker
+  #  when: docker_btrfs.changed
+
+  - name: ensure /var/lib/docker is mounted
+    mount: name=/var/lib/docker fstype=btrfs src=/dev/sdb state=mounted
 
   #
   # Docker
@@ -45,8 +49,9 @@
   - name: configure docker use btrfs
     lineinfile: dest=/etc/default/docker.io regexp="#DOCKER_OPTS" line="DOCKER_OPTS=\"-s btrfs\"" backrefs=yes
     register: docker_host
-  
-  - name: 
+
+  - name: ensure docker is running
+    service: name=docker.io state=running
 
   - name: check if the busybox image has already been pulled
     shell: docker.io images | grep busybox
@@ -60,16 +65,6 @@
 
   - name: create a dockerfiles directory
     file: path=/home/vagrant/dockerfiles/bbrun state=directory
-
-  - name: copy over the bbrun files
-    copy: src=files/{{ item }} dest=/home/vagrant/dockerfiles/bbrun/{{ item }}
-    with_items:
-      - Dockerfile
-      - run.sh
-
-  - name: build the bbrun dockerfile
-    shell: docker.io build -t curtis/bbrun /home/vagrant/dockerfiles/bbrun/Dockerfile
-    ignore_errors: True
 
   - name: check if alias has been added to vagrant users .bashrc file
     shell: grep docker.io /home/vagrant/.bashrc
