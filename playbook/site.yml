@@ -4,10 +4,10 @@
   user: vagrant
   sudo: True
   vars:
-    package_cache_server: 10.10.10.10
+  #  package_cache_server: 10.10.10.10
   tasks:
-  - name: install proxy file for apt
-    template: src=templates/01proxy.j2 dest=/etc/apt/apt.conf.d/01proxy
+  #- name: install proxy file for apt
+  #  template: src=templates/01proxy.j2 dest=/etc/apt/apt.conf.d/01proxy
 
   #
   # btrfs
