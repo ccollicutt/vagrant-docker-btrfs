@@ -18,3 +18,10 @@ Metadata, single: total=8.00MiB, used=0.00
 vagrant@host1:~$ ps aux | grep [d]ocker
 root      4984  0.1  0.6 304032  9844 ?        Sl   23:44   0:00 /usr/bin/docker.io -d -s btrfs
 ```
+
+Note that this playbook also sets up an alias for docker.
+
+```bash
+vagrant@host1:~$ alias | grep docker
+alias docker='sudo docker.io'
+```
