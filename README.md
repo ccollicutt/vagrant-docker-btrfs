@@ -7,6 +7,8 @@ Note that it will create a .vdi file for /dev/sdb.
 ```bash
 $ vagrant up
 SNIP!
+$ vagrant ssh
+SNIP!
 $ sudo btrfs filesystem df /var/lib/docker
 Data, single: total=1.01GiB, used=337.43MiB
 System, DUP: total=8.00MiB, used=16.00KiB
