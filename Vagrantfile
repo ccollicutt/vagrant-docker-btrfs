@@ -20,6 +20,10 @@ Vagrant.configure("2") do |config|
 
     Vagrant.require_version ">= 1.5.0"
 
+    if Vagrant.has_plugin?("vagrant-cachier")
+        config.cache.scope = :box
+    end
+
     boxes.each do |opts|
         config.vm.define opts[:name] do |config|
             # Box basics
