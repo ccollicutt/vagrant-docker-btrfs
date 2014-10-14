@@ -1,7 +1,6 @@
 ---
 
 - hosts: all
-  user: vagrant
   sudo: True
   vars:
   #  package_cache_server: 10.10.10.10

@@ -9,7 +9,7 @@ boxes = [
         :name => :host1, 
         :pubip => '192.168.33.89',
         :privip => '10.2.0.89',
-        :box => 'trusty64',
+        :box => 'ubuntu/trusty64',
         :vbox_config => [
             { '--memory' => '1536' }
         ],
@@ -18,12 +18,17 @@ boxes = [
 
 Vagrant.configure("2") do |config|
 
+    Vagrant.require_version ">= 1.5.0"
+
+    if Vagrant.has_plugin?("vagrant-cachier")
+        config.cache.scope = :box
+    end
+
     boxes.each do |opts|
         config.vm.define opts[:name] do |config|
             # Box basics
             config.vm.hostname = opts[:name]
             config.vm.box = opts[:box]
-            config.vm.box_url = opts[:box_url]
             config.vm.network :private_network, ip: opts[:pubip]
             config.vm.network :private_network, ip: opts[:privip]
             config.ssh.forward_agent = true
@@ -51,7 +56,6 @@ Vagrant.configure("2") do |config|
 
         config.vm.provision "ansible" do |ansible|
             ansible.playbook = "playbook/site.yml"
-            ansible.host_key_checking = false
         end
     end
 
