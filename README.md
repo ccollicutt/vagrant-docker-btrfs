@@ -25,3 +25,9 @@ Note that this playbook also sets up an alias for docker.
 vagrant@host1:~$ alias | grep docker
 alias docker='sudo docker.io'
 ```
+
+## Requirements
+
+- Vagrant 1.5+
+- Ansible installed on the Vagrant Host
+
